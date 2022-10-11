@@ -7,10 +7,12 @@ from tkinter import *
 from tkinter import messagebox, filedialog
 from PIL import Image, ImageDraw
 
+
 import mysql.connector
 
 
-def ok():
+def loginfunc():
+    global uname
     mysqldb = mysql.connector.connect(host="localhost", user="root", password="mysql", database="signverification")
     mycursor = mysqldb.cursor()
     uname = e1.get()
@@ -21,21 +23,33 @@ def ok():
     results = mycursor.fetchall()
     if results:
         messagebox.showinfo("", "Login Success")
-        # root.call("PYTHON", "form.py")
-        # top = Toplevel()
-        # top.mainloop()
-        # root.destroy()
-        # Page2.pack(root)
-
+        p2.show()
         return True
-
     else:
         messagebox.showinfo("", "Incorrect Username Or Password")
         return False
 
 
+# def getuserdetailsfunc():
+#     mysqldb = mysql.connector.connect(host="localhost", user="root", password="mysql", database="signverification")
+#     mycursor = mysqldb.cursor()
+#     sql = "select * from userprofile where uname = %s "
+#     mycursor.execute(sql, "as")
+#     results = mycursor.fetchone()
+#     for row in results:
+#         nameValue = row['name']
+#         print(row['name'])
+
+#     if results:
+#         messagebox.showinfo("", "Login Success")
+#         p2.show()
+#         return True
+#     else:
+#         messagebox.showinfo("", "Incorrect Username Or Password")
+#         return False
+
+
 def edit():
-    print(nameentry.get())
     mysqldb = mysql.connector.connect(host="localhost", user="root", password="mysql", database="signverification")
     sql = "insert into userprofile (`name`, `nic`,`address`) VALUES ('" + nameentry.get() + "', '" + nicentry.get() + "', '" + addressentry.get() + "') "
     mycursor = mysqldb.cursor()
@@ -70,6 +84,7 @@ def press(evt):
 def save_image():
     img.save('img.png')
     messagebox.showinfo("", "Image Saved Successfully !! ")
+    p5.show()
     # tk.destroy()
 
 
@@ -83,7 +98,10 @@ def release(evt):
 def fileuploadfunc():
     root.fileName = filedialog.askopenfilename(initialdir="/", title="Select A File",
                                                filetype=(("jpeg", "*.jpg"), ("png", "*.png")))
+    # os.rename(root.fileName, "img01.png") 
+    # os.replace(root.fileName, '.\\')
     shutil.copy(root.fileName, '.\\')
+    p6.show()
 
 
 def matchimages():
@@ -91,9 +109,12 @@ def matchimages():
     if ans > 80:
         message = "Signatures Matched " + str(ans) + " % Please Proceed !!"
         messagebox.showinfo("", message)
+        edit()
+        p2.show()
     else:
         message = "Signatures Matched " + str(ans) + "% Please try again"
         messagebox.showinfo("", message)
+        p2.show()
 
 
 def match(path1, path2):
@@ -125,57 +146,70 @@ class Page(tk.Frame):
 
 
 class Page1(Page):
-
     def __init__(self, *args, **kwargs):
         Page.__init__(self, *args, **kwargs)
-
-        # label = tk.Label(self, text="This is page 2")
         global e1
         global e2
 
-        Label(self, text="UserName").place(x=10, y=10)
-        Label(self, text="Password").place(x=10, y=40)
+        Label(self, text="Login Page", font="ar 15 bold").place(x=200, y=150)
+        Label(self, text="UserName").place(x=100, y=210)
+        Label(self, text="Password").place(x=100, y=240)
         e1 = Entry(self)
-        e1.place(x=140, y=10)
+        e1.place(x=200, y=210)
         e2 = Entry(self)
-        e2.place(x=140, y=40)
+        e2.place(x=200, y=240)
         e2.config(show="*")
+        Button(self, text="Login", command=loginfunc, justify= "center", height=2, width=50).place(x=70, y=350)
 
-        Button(self, text="Login", command=ok, height=2, width=30).place(x=30, y=100)
 
-        # label.pack(side="top", fill="both", expand=True)
+def callback():
+    root.unbind('<Visibility>')
 
+def pagechangetofour():
+    messagebox.showinfo("", "Please Validate your Signature to Proceed")
+    p4.show()
 
 class Page2(Page):
     def __init__(self, *args, **kwargs):
         Page.__init__(self, *args, **kwargs)
-        Label(self, text="User Profile", font="ar 15 bold").grid(row=0, column=3)
-
+        # self.bind('<Visibility>', getuserdetailsfunc)  
+        #Label(self, text="User Profile", font="ar 15 bold").grid(row=0, column=3)
+        Label(self, text="User Profile", font="ar 15 bold").place(x=200, y=150)
+        
         global nameentry
         global nicentry
         global addressentry
 
-        name = Label(self, text="Name")
-        nic = Label(self, text="NIC")
-        address = Label(self, text="Address")
+        name = Label(self, text="Name").place(x=100, y=210)
+        nic = Label(self, text="NIC").place(x=100, y=240)
+        address = Label(self, text="Address").place(x=100, y=270)
 
-        name.grid(row=1, column=2)
-        nic.grid(row=2, column=2)
-        address.grid(row=3, column=2)
+        # name.grid(row=1, column=5)
+        # nic.grid(row=2, column=5)
+        # address.grid(row=3, column=5)
 
-        nameValue = StringVar
-        nicValue = StringVar
-        addressValue = StringVar
+        nameValue = StringVar()
+        nicValue = StringVar()
+        addressValue = StringVar()
 
+        
         nameentry = Entry(self, textvariable=nameValue)
         nicentry = Entry(self, textvariable=nicValue)
         addressentry = Entry(self, textvariable=addressValue)
 
-        nameentry.grid(row=1, column=3)
-        nicentry.grid(row=2, column=3)
-        addressentry.grid(row=3, column=3)
+        nameValue.set("namesh")
+        nicValue.set("1234567")
+        addressValue.set("dsfasdfsdfsd")
 
-        Button(self, text="Edit", command=edit, height=3, width=13).place(x=10, y=100)
+        # nameentry.grid(row=4, column=7)
+        # nicentry.grid(row=5, column=7)
+        # addressentry.grid(row=6, column=7)
+        nameentry.place(x=200, y=210)
+        nicentry.place(x=200, y=240)
+        addressentry.place(x=200, y=270)
+
+        # Button(self, text="Edit", command=edit, justify= "center", height=2, width=50).place(x=70, y=350)
+        Button(self, text="Validate Signature", command=pagechangetofour, justify= "center", height=2, width=50).place(x=70, y=350)
 
 
 class Page3(Page):
@@ -188,23 +222,26 @@ class Page3(Page):
 class Page4(Page):
     def __init__(self, *args, **kwargs):
         Page.__init__(self, *args, **kwargs)
+        label = tk.Label(self, text="Please Draw your Signature and Save", font="ar 15 bold")
+        label.pack(side="top", fill="both", expand=True)
+
         global canvas
         global mousePressed
         global last
         global img
         global draw
 
-        canvas = Canvas(self, width=500, height=500)
+        canvas = Canvas(self, width=500, height=500, border=2)
         canvas.pack(side="top", fill="both", expand=True)
 
-        img = Image.new('RGB', (500, 500), (255, 255, 255))
+        img = Image.new('RGB', (400, 400), (255, 255, 255))
         draw = ImageDraw.Draw(img)
         mousePressed = False
         last = None
         canvas.bind_all('<ButtonPress-1>', press)
         canvas.bind_all('<ButtonRelease-1>', release)
         canvas.bind_all('<Motion>', move)
-        Button(self, text="Save", command=save_image, height=2, width=50).place(x=70, y=350)
+        Button(self, text="Save", command=save_image, height=2, width=50, justify= "center").place(x=70, y=350)
 
 
 class Page5(Page):
@@ -215,13 +252,15 @@ class Page5(Page):
         canvasx = Canvas(self, width=400, height=200)
         canvasx.pack()
         Label(self, text="Open A File")
-        Button(self, text="Open A File", command=fileuploadfunc, height=2, width=45).place(x=40, y=30)
+        Button(self, text="Open A File", command=fileuploadfunc, justify= "center", height=2, width=50).place(x=70, y=350)
+        # Button(self, text="Open A File", command=fileuploadfunc, height=2, width=45, justify= "center").place(x=40, y=30)
 
 
 class Page6(Page):
     def __init__(self, *args, **kwargs):
         Page.__init__(self, *args, **kwargs)
-        Button(self, text="Match Signatures", command=matchimages, height=2, width=45).place(x=40, y=30)
+        Button(self, text="Match Signatures", command=matchimages, justify= "center", height=2, width=50).place(x=70, y=350)
+    #    Button(self, text="Match Signatures", command=matchimages, height=2, width=45, justify= "center").place(x=40, y=30)
 
 
 class Page7(Page):
@@ -241,6 +280,17 @@ class Page8(Page):
 class MainView(tk.Frame):
     def __init__(self, *args, **kwargs):
         tk.Frame.__init__(self, *args, **kwargs)
+
+
+        global p1
+        global p2
+        global p3
+        global p4
+        global p5
+        global p6
+        global p7
+        global p8
+
         p1 = Page1(self)
         p2 = Page2(self)
         p3 = Page3(self)
@@ -252,7 +302,7 @@ class MainView(tk.Frame):
 
         buttonframe = tk.Frame(self)
         container = tk.Frame(self)
-        buttonframe.pack(side="top", fill="x", expand=False)
+        # buttonframe.pack(side="top", fill="x", expand=False)
         container.pack(side="top", fill="both", expand=True)
 
         p1.place(in_=container, x=0, y=0, relwidth=1, relheight=1)
@@ -264,8 +314,8 @@ class MainView(tk.Frame):
         p7.place(in_=container, x=0, y=0, relwidth=1, relheight=1)
         p8.place(in_=container, x=0, y=0, relwidth=1, relheight=1)
 
-        b1 = tk.Button(buttonframe, text="Page 1", command=p1.show)
-        b2 = tk.Button(buttonframe, text="Page 2", command=p2.show)
+        b1 = tk.Button(buttonframe, text="Login Page", command=p1.show, state="disabled")
+        b2 = tk.Button(buttonframe, text="User", command=p2.show)
         b3 = tk.Button(buttonframe, text="Page 3", command=p3.show)
         b4 = tk.Button(buttonframe, text="Page 4", command=p4.show)
         b5 = tk.Button(buttonframe, text="Page 5", command=p5.show)
